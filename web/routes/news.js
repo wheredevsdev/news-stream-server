@@ -1,6 +1,6 @@
 module.exports = function (app) {
 
-    var controller = require('../Controllers/NewsController');
+    var controller = require('../controllers/news');
 
     app.route('/NewsPost')
         .get(controller.get_form_data)

@@ -1,4 +1,4 @@
-var newsModel = require('../Models/NewsModel');
+var newsModel = require('../../database/models/PreviewReview');
 var mongoose = require('mongoose');
 var nModel = mongoose.model('newsy');
 
