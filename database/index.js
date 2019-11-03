@@ -1,5 +1,7 @@
+
 const mongoose = require("mongoose");
 const URI = process.env.DB;
+console.log(URI);
 
 mongoose.Promise = global.Promise;
 

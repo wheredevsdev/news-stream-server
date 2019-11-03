@@ -31,4 +31,4 @@ var PreReviewSchema = new Schema({
     }
 });
 
-module.exports = mongoose.model('prereview', PreReviewSchema);
+module.exports = mongoose.model('newsy', PreReviewSchema);

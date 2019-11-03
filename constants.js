@@ -1,6 +1,6 @@
 const COLLECTIONS = {
 	POST_REVIEW: 'postreview',
-	PRE_REVIEW: 'preview'
+	PRE_REVIEW: 'newsy'
 }
 
 exports.COLLECTIONS = COLLECTIONS;

@@ -1,5 +1,5 @@
 module.exports = async function () {
-    require('dotenv').config();
+
     var express = require('express'),
         port = process.env.PORT || 3000,
         app = express(),
@@ -10,7 +10,7 @@ module.exports = async function () {
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.json());
 
-    app.set('views', path.join(__dirname, './API/views'));
+    app.set('views', path.join(__dirname, './views'));
     app.set('view engine', 'ejs');
 
     require('./routes/news')(app);

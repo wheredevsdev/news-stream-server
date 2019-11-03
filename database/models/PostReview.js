@@ -18,20 +18,20 @@
  * 
  */
 
-'use strict';
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+// 'use strict';
+// var mongoose = require('mongoose');
+// var Schema = mongoose.Schema;
 
-var PostReviewSchema = new Schema({
-	title: {
-        type: String
-    },
-    author: {
-        type: String
-    },
-    content: {
-        type:String
-    }
-});
+// var PostReviewSchema = new Schema({
+// 	title: {
+//         type: String
+//     },
+//     author: {
+//         type: String
+//     },
+//     content: {
+//         type:String
+//     }
+// });
 
-module.exports = mongoose.model('postreview', PostReviewSchema);
+// module.exports = mongoose.model('newsy', PostReviewSchema);
