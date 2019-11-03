@@ -1,6 +1,6 @@
 var newsModel = require('../../database/models/PreviewReview');
 var mongoose = require('mongoose');
-var nModel = mongoose.model('newsy');
+var nModel = mongoose.model('prereview');
 
 exports.get_form_data =  function (req, res) {
 
@@ -23,7 +23,7 @@ exports.post_form_data =  function (req, res) {
 
 exports.get_articles = function (req, res) {
 
-    nModel.find({ content:"SomeContentV"}, function (err, articles) {
+    nModel.find({ status:"unsent"}, function (err, articles) {
         if (err) {
             console.log(err);
         }

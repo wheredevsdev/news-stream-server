@@ -26,9 +26,32 @@ var PreReviewSchema = new Schema({
     author: {
         type: String
     },
-    content: {
+    publishDate: {
         type:String
+    },
+    origin:{
+        type:String
+    },
+    url:{
+        type:String
+    },
+    publishedDate:{
+        type:Date,
+        default: (new Date()).toLocaleDateString()
+    },
+    createdDate:{
+        type:Date,
+        default: (new Date()).toLocaleDateString()
+    },
+    source:{
+        type:String,
+        default:"API"
+    },
+    status:{
+        type:String,
+        default:"unsent"
     }
+
 });
 
-module.exports = mongoose.model('newsy', PreReviewSchema);
+module.exports = mongoose.model('prereview', PreReviewSchema);

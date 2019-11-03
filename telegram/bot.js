@@ -6,35 +6,36 @@ const { getModel: collection } = require("../database");
 
 module.exports = async function () {
 
-	bot.onText(/\/review/, (msg, match) => {
+	
 
-		const chatId = msg.chat.id;
+	const chatId = Number(process.env.CHATID);
+	console.log(process.env.CHATID);
 
-		collection(COLLECTIONS.PRE_REVIEW).find({ content: "SomeContentX" }).exec((err, news) => {
-			news.forEach((news) => {
-				console.log(news._id);
-				bot.sendMessage(
-					chatId,
-					'Review ' + news.title + '?',
-					{
-						reply_markup: {
-							inline_keyboard: [[
-								{
-									text: 'Accept',
-									callback_data: 'Accepted,' + news._id
-								}, {
-									text: 'Reject',
-									callback_data: 'Rejected,' + news._id
-								}
-							]]
-						}
+	collection(COLLECTIONS.PRE_REVIEW).find({ status:"unsent" }).exec((err, news) => {
+		news.forEach((news) => {
+			console.log(news._id);
+			bot.sendMessage(
+				chatId,
+				'Review ' + news.title + '?',
+				{
+					reply_markup: {
+						inline_keyboard: [[
+							{
+								text: 'Accept',
+								callback_data: 'Accepted,' + news._id
+							}, {
+								text: 'Reject',
+								callback_data: 'Rejected,' + news._id
+							}
+						]]
 					}
-				);
+				}
+			);
 
 
-			});
 		});
 	});
+	
 
 	bot.on('callback_query', (callbackQuery) => {
 
