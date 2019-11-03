@@ -1,0 +1,25 @@
+<% if(articles.length>0) {%>
+
+<table border = "1">
+	<tr>
+		<th>id</th>
+		<th>Title</th>
+		<th>Author</th>
+		<th>Content</th>
+	</tr>
+	<% for(var i=0; i<articles.length; i++){ %>
+		<tr>
+			<td><%= i %></td>
+			<td><%= articles[i].title %></td>
+			<td><%= articles[i].author %></td>
+			<td><%= articles[i].content %></td>
+			
+		</tr>
+
+	<% } %>
+</table>
+
+<% } else { %>
+	<p>No record found</p>
+<% } %>
+
