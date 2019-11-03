@@ -6,8 +6,6 @@ const { getModel: collection } = require("../database");
 
 module.exports = async function () {
 
-	
-
 	const chatId = Number(process.env.CHATID);
 	console.log(process.env.CHATID);
 
@@ -22,17 +20,15 @@ module.exports = async function () {
 						inline_keyboard: [[
 							{
 								text: 'Accept',
-								callback_data: 'Accepted,' + news._id
+								callback_data: news.title + ',Accepted,' + news._id
 							}, {
 								text: 'Reject',
-								callback_data: 'Rejected,' + news._id
+								callback_data: news.title + ',Rejected,' + news._id
 							}
 						]]
 					}
 				}
 			);
-
-
 		});
 	});
 	
@@ -41,7 +37,9 @@ module.exports = async function () {
 
 		const message = callbackQuery.message;
 		const callback = callbackQuery.data;
-
-		bot.sendMessage(message.chat.id, `Article has been "${callback}"`);
+		
+		var newsTitle = callback.split(',');
+		bot.sendMessage(message.chat.id, 'Article '+ newsTitle[0] + ' has been ' + newsTitle[1] );
+		bot.deleteMessage(process.env.CHATID,message.message_id);
 	});
 }
