@@ -2,7 +2,6 @@ require('dotenv').config();
 const webServer = require("./web/server");
 const database = require("./database");
 const newsBot = require("./telegram/cron");
-const newsBotCallback = require("./telegram/bot");
 
 
 (async function main() {
@@ -15,8 +14,5 @@ const newsBotCallback = require("./telegram/bot");
 
 	console.log("Starting Telegram Review Bot.");
 	await newsBot();
-
-	console.log("Initiating Telegram Review Bot Callback.");
-	await newsBotCallback.botCallbackInit();
 
 })();

@@ -42,17 +42,15 @@ module.exports.botInit = async function () {
 	});
 }
 
-module.exports.botCallbackInit = async function(){
 
-	bot.on('callback_query', (callbackQuery) => {
+bot.on('callback_query', (callbackQuery) => {
 
-		const message = callbackQuery.message;
-		const callback = callbackQuery.data;
+	const message = callbackQuery.message;
+	const callback = callbackQuery.data;
 
-		var newsTitle = callback.split(',');
-		bot.sendMessage(message.chat.id, 'Article '+ newsTitle[0] + ' has been ' + newsTitle[1] )
-		
-		bot.deleteMessage(process.env.CHATID,message.message_id);
-	});
+	var newsTitle = callback.split(',');
+	bot.sendMessage(message.chat.id, 'Article '+ newsTitle[0] + ' has been ' + newsTitle[1] )
 	
-}
+	bot.deleteMessage(process.env.CHATID,message.message_id);
+});
+

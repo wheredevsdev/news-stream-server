@@ -1,7 +1,7 @@
-module.exports = async function () {
+const cronJob = require('node-cron');
+const telegramBot = require('./bot');
 
-    const cronJob = require('node-cron');
-    const telegramBot = require('./bot');
+module.exports = async function () {
 
     const CRON_CONFIGURATIONS = {
         cronTime: '*/5 * * * *',
@@ -10,5 +10,5 @@ module.exports = async function () {
     };
     
     cronJob.schedule(CRON_CONFIGURATIONS.cronTime, telegramBot.botInit, {runOnInit: true});
-}
+}   
 
