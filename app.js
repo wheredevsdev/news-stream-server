@@ -2,8 +2,6 @@ require('dotenv').config();
 const webServer = require("./web/server");
 const database = require("./database");
 const newsBot = require("./telegram/cron");
-const googleAPI = require("./web/Google_API");
-
 
 (async function main() {
 	
@@ -15,8 +13,5 @@ const googleAPI = require("./web/Google_API");
 
 	console.log("Starting Telegram Review Bot.");
 	await newsBot();
-
-	console.log("Get article into the collection.");
-	await googleAPI.getNews();
 
 })();
