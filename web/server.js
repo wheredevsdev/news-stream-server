@@ -1,11 +1,12 @@
-module.exports = async function () {
-
-    var express = require('express'),
+var express = require('express'),
         port = process.env.PORT || 3000,
         app = express(),
         bodyParser = require('body-parser');
 
     var path = require('path');
+    var server = require('http').Server(app);
+
+module.exports = async function () {
 
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.json());
@@ -15,7 +16,11 @@ module.exports = async function () {
 
     require('./routes/news')(app);
 
-    app.listen(port, () => {
+    let io = require('socket.io')(server);
+    
+    server.listen(port, () => {
         console.log('Server started on ' + port);
     });
+
+    return io;
 }

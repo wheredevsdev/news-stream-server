@@ -1,7 +1,9 @@
 require('dotenv').config();
 const webServer = require("./web/server");
 const database = require("./database");
-const newsBot = require("./telegram/cron");
+const newsAPI = require("./library/newsAPI");
+const newsBotJob = require("./telegram/cron");
+const newsBot = require("./telegram/bot");
 
 (async function main() {
 	
@@ -9,9 +11,15 @@ const newsBot = require("./telegram/cron");
 	await database.init();
 
 	console.log("Starting HTTP web server.");
-	await webServer();
+	let ioObject = await webServer();
 
-	console.log("Starting Telegram Review Bot.");
-	await newsBot();
+	// console.log("Starting the news api fetch");
+	// await newsAPI.getNews();
 
+	console.log("Starting Telegram review bot.");
+	await newsBotJob();
+
+	console.log("Initiating Telegram review bot Callback listener.");
+	await newsBot.setBotCallbackEvent(ioObject);
+	
 })();

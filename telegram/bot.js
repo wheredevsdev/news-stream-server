@@ -9,19 +9,36 @@ const { getModel: collection } = require("../database");
  * @description Triggered when someone presses the 'Accept' or 'Reject' button.
  * @todo Fetch document from Prereview using _id in newsDetails[2];
  */
-bot.on('callback_query', callbackQuery => {
 
-	const message = callbackQuery.message;
-	const callback = callbackQuery.data;
+async function setBotCallbackEvent (ioObject){
 
-	const newsDetails = callback.split(',');
+	bot.on('callback_query', callbackQuery => {
 
-	// Send a message telling whether the article has been accepted or rejected.
-	bot.sendMessage(message.chat.id, "Article \"" + newsDetails[0] + "\" has been " + newsDetails[1]);
+		const message = callbackQuery.message;
+		const callback = callbackQuery.data;
+	
+		const newsDetails = callback.split(',');
 
-	// Delete the message with article details and inline keyboard.
-	bot.deleteMessage(process.env.CHATID, message.message_id);
-});
+		ioObject.on('Connection', function(socket){
+
+			ioObject.sockets.emit('new_article', {data: 'SomeArticle'});
+
+			socket.on('disconnect', function(){
+				//DO nothing?
+			});
+
+		});
+			
+		// Send a message telling whether the article has been accepted or rejected.
+		bot.sendMessage(message.chat.id, "Article \"" + newsDetails[0] + "\" has been " + newsDetails[1]);
+	
+		// Delete the message with article details and inline keyboard.
+		bot.deleteMessage(process.env.CHATID, message.message_id);
+	});
+
+}
+exports.setBotCallbackEvent = setBotCallbackEvent;
+
 
 
 /**
@@ -31,7 +48,6 @@ bot.on('callback_query', callbackQuery => {
 function sendForReview() {
 
 	const chatId = parseInt(process.env.CHATID);
-
 	// Find the "unsent" articles in the preReview collection.
 	collection(COLLECTIONS.PRE_REVIEW)
 		.find({ status: "unsent" })
@@ -46,7 +62,7 @@ function sendForReview() {
 				// Checking that the title only contains ASCII characters
 				// Because the bot does not support non-ascii characters 
 				const ascii = /^[ -~\t\n\r]+$/;
-				const title = "";
+				let title = "";
 
 				if (ascii.test(articleTitleTrim)) {
 					title = articleTitleTrim;
