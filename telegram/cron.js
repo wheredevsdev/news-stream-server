@@ -7,7 +7,7 @@ const newsAPI = require("../library/newsAPI");
 // Call .start(jobName) to trigger tickFunction every cronTime.
 const JOB_CONFIGS = {
     "NEWS_FETCH": ['* * */24 * * *', telegramBot.sendForReview],
-    "NEWS_REVIEW": ['* * * */1 * *', newsAPI.getNews] // Iska cronTime koi set kar do.
+    "NEWS_REVIEW": ['* * */24 * * *', newsAPI.getNews] // Iska cronTime koi set kar do.
 };
 
 exports.start = function (jobName) {

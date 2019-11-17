@@ -1,6 +1,7 @@
 const { getModel: collection } = require("../database");
 const NewsAPI = require('newsapi');
 const axios = require("axios");
+const Bluebird = require("bluebird");
 
 const newsAPI = new NewsAPI(process.env.NEWSAPITOKEN);
 
