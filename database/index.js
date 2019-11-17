@@ -6,7 +6,7 @@ mongoose.Promise = global.Promise;
 
 exports.init = function () {
 
-	require("./models/PreviewReview");
+	require("./models/PreReview");
 	require("./models/PostReview");
 
 	return mongoose.connect(URI, { useNewUrlParser: true })
