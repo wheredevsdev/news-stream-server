@@ -1,8 +1,13 @@
+var newsModel = require('../database/models/PostReview');
+const { getModel: collection } = require("../database");
+const mongoose = require('mongoose');
+const nModel = mongoose.model('PreReview');
+const postReviewModel = mongoose.model('PostReview');
+
 const TelegramBot = require('node-telegram-bot-api');
 const bot = new TelegramBot(process.env.TOKEN, { polling: true });
 
 const { COLLECTIONS } = require("../constants");
-const { getModel: collection } = require("../database");
 
 
 /**
@@ -18,22 +23,42 @@ async function setBotCallbackEvent (ioObject){
 		const callback = callbackQuery.data;
 	
 		const newsDetails = callback.split(',');
+			
+		// Send a message telling whether the article has been accepted or rejected.
+		bot.sendMessage(message.chat.id, "Article \"" + newsDetails[0] + "\" has been " + newsDetails[1])
+		.then(() => nModel.findOneAndUpdate({ _id: newsDetails[2] }, { status: newsDetails[1] }, { upsert: false }))
+		.catch(err => console.log(err));
 
-		ioObject.on('Connection', function(socket){
+		let ObjectId = mongoose.Types.ObjectId;
+
+		// Adding article to PostReview if it has been accepted
+		if(newsDetails[1] == 'Accepted') {
 
 			ioObject.sockets.emit('new_article', {data: 'SomeArticle'});
 
-			socket.on('disconnect', function(){
-				//DO nothing?
-			});
+			nModel.findOne({ _id: ObjectId(newsDetails[2]) }).exec()
+			.then(news => {
+				console.log("Inserting data into the post-review collection");
+				postReviewModel.create({
+					title: news.title,
+					author: news.author,
+					publishedDate: news.publishedAt,
+					origin: news.source,
+					url: news.url,
+					urlToImage: news.urlToImage,
+					content: news.content
+				});
 
-		});
-			
-		// Send a message telling whether the article has been accepted or rejected.
-		bot.sendMessage(message.chat.id, "Article \"" + newsDetails[0] + "\" has been " + newsDetails[1]);
-	
-		// Delete the message with article details and inline keyboard.
-		bot.deleteMessage(process.env.CHATID, message.message_id);
+				////console.log(news);
+				// Delete the message with article details and inline keyboard.
+				bot.deleteMessage(process.env.CHATID, message.message_id);
+			})
+			.catch(err => {
+				console.log(err);
+				bot.sendMessage(message.chat.id, "An error occurred while 'Accepting' \"" + newsDetails[0] + "\". The _id is: " + newsDetails[2]);
+			});
+		}
+		
 	});
 
 }

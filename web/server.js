@@ -17,6 +17,13 @@ module.exports = async function () {
     require('./routes/news')(app);
 
     let io = require('socket.io')(server);
+
+    io.on('Connection', function(socket){
+        
+        socket.on('disconnect', function(){
+            //DO nothing?
+        });
+    });
     
     server.listen(port, () => {
         console.log('Server started on ' + port);
