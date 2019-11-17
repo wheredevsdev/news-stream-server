@@ -1,8 +1,6 @@
-var newsModel = require('../database/models/PostReview');
 const { getModel: collection } = require("../database");
-const mongoose = require('mongoose');
-const nModel = mongoose.model('PreReview');
-const postReviewModel = mongoose.model('PostReview');
+const { Types } = require('mongoose');
+const Bluebird = require("bluebird");
 
 const TelegramBot = require('node-telegram-bot-api');
 const bot = new TelegramBot(process.env.TOKEN, { polling: true });
@@ -12,55 +10,60 @@ const { COLLECTIONS } = require("../constants");
 
 /**
  * @description Triggered when someone presses the 'Accept' or 'Reject' button.
- * @todo Fetch document from Prereview using _id in newsDetails[2];
+ * @param { * } ioObject socket.io Object
  */
-
-async function setBotCallbackEvent (ioObject){
+async function setBotCallbackEvent(ioObject) {
 
 	bot.on('callback_query', callbackQuery => {
 
 		const message = callbackQuery.message;
 		const callback = callbackQuery.data;
-	
+
 		const newsDetails = callback.split(',');
-			
-		// Send a message telling whether the article has been accepted or rejected.
-		bot.sendMessage(message.chat.id, "Article \"" + newsDetails[0] + "\" has been " + newsDetails[1])
-		.then(() => nModel.findOneAndUpdate({ _id: newsDetails[2] }, { status: newsDetails[1] }, { upsert: false }))
-		.catch(err => console.log(err));
-
-		let ObjectId = mongoose.Types.ObjectId;
-
-		// Adding article to PostReview if it has been accepted
-		if(newsDetails[1] == 'Accepted') {
-
-			ioObject.sockets.emit('new_article', {data: 'SomeArticle'});
-
-			nModel.findOne({ _id: ObjectId(newsDetails[2]) }).exec()
-			.then(news => {
-				console.log("Inserting data into the post-review collection");
-				postReviewModel.create({
-					title: news.title,
-					author: news.author,
-					publishedDate: news.publishedAt,
-					origin: news.source,
-					url: news.url,
-					urlToImage: news.urlToImage,
-					content: news.content
-				});
-
-				////console.log(news);
-				// Delete the message with article details and inline keyboard.
-				bot.deleteMessage(process.env.CHATID, message.message_id);
-			})
-			.catch(err => {
-				console.log(err);
-				bot.sendMessage(message.chat.id, "An error occurred while 'Accepting' \"" + newsDetails[0] + "\". The _id is: " + newsDetails[2]);
-			});
-		}
 		
+		return Promise.resolve()
+			.then(function () {
+				// Adding article to PostReview if it has been accepted
+				if (newsDetails[1] == 'Accepted') {
+					return collection(COLLECTIONS.PRE_REVIEW)
+						.findOne({ _id: Types.ObjectId(newsDetails[2]) })
+						.exec()
+						.then(news => {
+							console.log("Inserting data into the post-review collection");
+		
+							return collection(COLLECTIONS.POST_REVIEW)
+								.create({
+									title: news.title,
+									author: news.author,
+									publishedDate: news.publishedAt,
+									origin: news.source,
+									url: news.url,
+									urlToImage: news.urlToImage,
+									content: news.content
+								})
+								.then(function () {
+									// Emit new article event only when succesfully saved to our database.
+									ioObject.sockets.emit('new_article', { data: 'SomeArticle' });
+		
+									// Delete the message with article details and inline keyboard.
+									bot.deleteMessage(process.env.CHATID, message.message_id);
+								});
+						})
+						.catch(err => {
+							console.log(err);
+							return bot.sendMessage(message.chat.id, "An error occurred while 'Accepting' \"" + newsDetails[0] + "\". The _id is: " + newsDetails[2]);
+						});
+				} else {
+					return undefined;
+				}
+			})
+			.then(function () {
+				// Send a message telling whether the article has been accepted or rejected.
+				return bot.sendMessage(message.chat.id, "Article \"" + newsDetails[0] + "\" has been " + newsDetails[1])
+					.then(() => nModel.findOneAndUpdate({ _id: newsDetails[2] }, { status: newsDetails[1] }, { upsert: false }));
+			})
+			.catch(err => console.log(err));
 	});
-
 }
 exports.setBotCallbackEvent = setBotCallbackEvent;
 
@@ -78,7 +81,7 @@ function sendForReview() {
 		.find({ status: "unsent" })
 		.limit(20)
 		.then(news => {
-			news.forEach((news) => {
+			return Bluebird.map(news, news => {
 				const completeTitle = '' + news.title;
 
 				// Trimming the title down to 20 display characters.
@@ -94,7 +97,7 @@ function sendForReview() {
 				}
 
 				//Sending the message with article details and inline keyboard.
-				bot.sendMessage(
+				return bot.sendMessage(
 					chatId,
 					'Review ' + news.title + ' at ' + news.url + ' ?',
 					{
@@ -115,9 +118,9 @@ function sendForReview() {
 					// Change the status of the article to "sentForReview" in DB.
 					return collection(COLLECTIONS.PRE_REVIEW)
 						.findOneAndUpdate({ _id: news._id }, { status: "sentForReview" }, { upsert: false })
-						.catch(function (err) {
-							console.log(err);
-						});
+				})
+				.catch(function (err) {
+					console.log(err);
 				});
 			});
 		})
