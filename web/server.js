@@ -1,10 +1,12 @@
-var express = require('express'),
-        port = process.env.PORT || 3000,
-        app = express(),
-        bodyParser = require('body-parser');
+const express = require('express'),
+    socketServer = require('socket.io'),
+    port = process.env.PORT || 3000,
+    app = express(),
+    bodyParser = require('body-parser'),
+    path = require('path'),
+    httpServer = require('http').Server(app);
 
-    var path = require('path');
-    var server = require('http').Server(app);
+global.SOCKET_CONNECTIONS = 0;
 
 module.exports = async function () {
 
@@ -16,16 +18,19 @@ module.exports = async function () {
 
     require('./routes/news')(app);
 
-    let io = require('socket.io')(server);
+    const io = new socketServer(httpServer);
 
-    io.on('Connection', function(socket){
+    io.on('Connection', socket => {
+        global.SOCKET_CONNECTIONS++;
+        console.log(`Received connection from ${socket.handshake.address}. ID: ${socket.id}`);
         
-        socket.on('disconnect', function(){
-            //DO nothing?
+        socket.on('disconnect', () => {
+            --global.SOCKET_CONNECTIONS;
+            console.log(`${socket.id} disconnected.`);
         });
     });
-    
-    server.listen(port, () => {
+
+    httpServer.listen(port, () => {
         console.log('Server started on ' + port);
     });
 
