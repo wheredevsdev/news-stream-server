@@ -97,28 +97,30 @@ function sendForReview(articleLimit = 20) {
 				}
 
 				//Sending the message with article details and inline keyboard.
-				return bot.sendMessage(
-					chatId,
-					'Review ' + news.title + ' at ' + news.url + ' ?',
-					{
-						reply_markup: {
-							inline_keyboard: [[
-								{
-									text: 'Accept',
-									callback_data: title + ',Accepted,' + news._id
-								},
-								{
-									text: 'Reject',
-									callback_data: title + ',Rejected,' + news._id
-								}
-							]]
+				return bot
+					.sendMessage(
+						chatId,
+						'Review ' + news.title + ' at ' + news.url + ' ?',
+						{
+							reply_markup: {
+								inline_keyboard: [[
+									{
+										text: 'Accept',
+										callback_data: title + ',Accepted,' + news._id
+									},
+									{
+										text: 'Reject',
+										callback_data: title + ',Rejected,' + news._id
+									}
+								]]
+							}
 						}
-					}
-				).then(function () {
-					// Change the status of the article to "sentForReview" in DB.
-					return collection(COLLECTIONS.PRE_REVIEW)
-						.findOneAndUpdate({ _id: news._id }, { status: "sentForReview" }, { upsert: false })
-				})
+					)
+					.then(function () {
+						// Change the status of the article to "sentForReview" in DB.
+						return collection(COLLECTIONS.PRE_REVIEW)
+							.findOneAndUpdate({ _id: news._id }, { status: "sentForReview" }, { upsert: false })
+					})
 					.catch(function (err) {
 						console.log(err);
 					});

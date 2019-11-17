@@ -1,5 +1,5 @@
 const NewsLib = require("../../library/newsAPI");
-const BotLib = require("../../telegram/bot");
+const BotLib = require("../../library/bot");
 
 module.exports = function (app) {
 

@@ -1,8 +1,8 @@
 require('dotenv').config();
 const webServer = require("./web/server");
 const database = require("./database");
-const cron = require("./telegram/cron");
-const newsBot = require("./telegram/bot");
+const cron = require("./web/cron");
+const BotLib = require("./library/bot");
 
 (async function main() {
 
@@ -19,6 +19,6 @@ const newsBot = require("./telegram/bot");
 	cron.start("NEWS_REVIEW");
 
 	console.log("Initiating Telegram review listener.");
-	newsBot.listenForReviews(ioObject);
+	BotLib.listenForReviews(ioObject);
 
 })();

@@ -9,7 +9,7 @@ exports.init = function () {
 	require("./models/PreReview");
 	require("./models/PostReview");
 
-	return mongoose.connect(URI, { useNewUrlParser: true })
+	return mongoose.connect(URI, { useUnifiedTopology: true, useNewUrlParser: true })
 		.then(function () {
 			console.log("Connection to database established succesfully.");
 		})

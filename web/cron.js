@@ -1,5 +1,5 @@
 const { CronJob } = require('cron');
-const telegramBot = require('./bot');
+const telegramBot = require('../library/bot');
 const newsAPI = require("../library/newsAPI");
 
 // Job configuration tuples.
