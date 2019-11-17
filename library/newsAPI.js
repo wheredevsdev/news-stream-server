@@ -16,10 +16,7 @@ function getNews() {
 
     function requestHackerNews() {
         return axios.get(HACKERNEWS_TOP_URL)
-            .then(response => response.data)
-            .catch(err => {
-                console.log(err);
-            });
+            .then(response => response.data);
     }
 
     function requestNewsAPI() {
@@ -28,18 +25,12 @@ function getNews() {
                 sources: SOURCES.join(","),
                 language: 'en',
                 pageSize: 40
-            })
-            .catch(function (err) {
-                console.log(err);
-            })
+            });
     }
 
     function requestGNews() {
         return axios.get(GNEWS_TOP_URL)
-            .then(response => response.data)
-            .catch(err => {
-                console.log(err)
-            });
+            .then(response => response.data);
     }
 
     function insertNews(previewArr) {
@@ -48,9 +39,7 @@ function getNews() {
             .insertMany(previewArr)
             .then(() => {
                 console.log(previewArr.length + " articles inserted into the preReview collection");
-            }).catch(err => {
-                console.log(err);
-            });
+            })
     }
 
     // Get the published-date of the newest article from the database
@@ -92,12 +81,12 @@ function getNews() {
                 })
                 .catch(err => {
                     console.log(err);
-                })
+                });
 
             // Get the response from HackerNews and insert the response into preReview collection.
             const prmHackerNews = requestHackerNews()
                 .then(response => {
-                    return Bluebird.map(response.data, id => {
+                    return Bluebird.map(response, id => {
                         const url = `${HACKERNEWS_STORY_URL}${id}.json`;
                         return axios.get(url).then(response => response.data);
                     })
@@ -124,33 +113,41 @@ function getNews() {
                     console.log(err);
                 });
 
-            // Get data fron GNewsAPI and insert the response into preReview collection.
+            // // Get data fron GNewsAPI and insert the response into preReview collection.
             const prmGNews = requestGNews()
                 .then((response) => {
-                    const preReviewGNews = [];
-                    for (let j = 0; j < 10; j++) {
-                        // Accept responses only where the author is not null to minimise repeated articles.
-                        // console.log(new Date(response[j].time * 1000), new Date(maxDate));
-                        console.log(response.articles[j].source);
-                        if (new Date(response.articles[j].publishedAt) > new Date(maxDate)) {
-                            preReviewGNews.push({
-                                title: response.articles[j].title,
-                                author: 'Not Specified',
-                                publishedDate: response.articles[j].publishedAt,
-                                origin: response.articles[j].source.name,
-                                url: response.articles[j].url,
-                                urlToImage: response.articles[j].image,
-                                content: response.articles[j].content
-                            });
+                    if (response) {
+                        const preReviewGNews = [];
+                        for (let j = 0; j < 10; j++) {
+                            // Accept responses only where the author is not null to minimise repeated articles.
+                            // console.log(new Date(response[j].time * 1000), new Date(maxDate));
+                            console.log(response.articles[j].source);
+                            if (new Date(response.articles[j].publishedAt) > new Date(maxDate)) {
+                                preReviewGNews.push({
+                                    title: response.articles[j].title,
+                                    author: 'Not Specified',
+                                    publishedDate: response.articles[j].publishedAt,
+                                    origin: response.articles[j].source.name,
+                                    url: response.articles[j].url,
+                                    urlToImage: response.articles[j].image,
+                                    content: response.articles[j].content
+                                });
+                            }
                         }
+                        return insertNews(preReviewGNews);
+                    } else {
+                        return undefined;
                     }
-                    return insertNews(preReviewGNews);
                 })
                 .catch(err => {
                     console.log(err);
                 });
 
-            return Promise.all([prmNewsAPI, prmHackerNews, prmGNews])
+            return Promise.all([
+                prmNewsAPI, 
+                prmHackerNews, 
+                prmGNews
+            ])
         }).catch(err => {
             console.log(err);
         });

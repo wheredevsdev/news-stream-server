@@ -18,4 +18,4 @@ const HACKERNEWS_STORY_URL = 'https://hacker-news.firebaseio.com/v0/item/';
 exports.HACKERNEWS_STORY_URL = HACKERNEWS_STORY_URL;
 
 const GNEWS_TOP_URL = `https://gnews.io/api/v3/topics/technology?max=20&token=${process.env.GNEWSTOKEN}`;
-exports.GNEWS_TOP_Url = GNEWS_TOP_URL;
+exports.GNEWS_TOP_URL = GNEWS_TOP_URL;

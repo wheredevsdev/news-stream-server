@@ -20,7 +20,7 @@ function listenForReviews(ioObject) {
 		const callback = callbackQuery.data;
 
 		const newsDetails = callback.split(',');
-		
+
 		return Promise.resolve()
 			.then(function () {
 				// Adding article to PostReview if it has been accepted
@@ -30,7 +30,7 @@ function listenForReviews(ioObject) {
 						.exec()
 						.then(news => {
 							console.log("Inserting data into the post-review collection");
-		
+
 							return collection(COLLECTIONS.POST_REVIEW)
 								.create({
 									title: news.title,
@@ -44,7 +44,7 @@ function listenForReviews(ioObject) {
 								.then(function () {
 									// Emit new article event only when succesfully saved to our database.
 									ioObject.sockets.emit('new_article', { data: 'SomeArticle' });
-		
+
 									// Delete the message with article details and inline keyboard.
 									bot.deleteMessage(process.env.CHATID, message.message_id);
 								});
@@ -73,13 +73,13 @@ exports.listenForReviews = listenForReviews;
  * @description Fetches articles from 'prereview' collection and sends messages for review using
  * the TG bot api.
  */
-function sendForReview() {
+function sendForReview(articleLimit = 20) {
 
 	const chatId = parseInt(process.env.CHATID);
 	// Find the "unsent" articles in the preReview collection.
 	collection(COLLECTIONS.PRE_REVIEW)
 		.find({ status: "unsent" })
-		.limit(20)
+		.limit(articleLimit)
 		.then(news => {
 			return Bluebird.map(news, news => {
 				const completeTitle = '' + news.title;
@@ -119,9 +119,9 @@ function sendForReview() {
 					return collection(COLLECTIONS.PRE_REVIEW)
 						.findOneAndUpdate({ _id: news._id }, { status: "sentForReview" }, { upsert: false })
 				})
-				.catch(function (err) {
-					console.log(err);
-				});
+					.catch(function (err) {
+						console.log(err);
+					});
 			});
 		})
 		.catch(function (err) {

@@ -3,7 +3,6 @@ const express = require('express'),
     port = process.env.PORT || 3000,
     app = express(),
     bodyParser = require('body-parser'),
-    path = require('path'),
     httpServer = require('http').Server(app);
 
 global.SOCKET_CONNECTIONS = 0;
@@ -12,9 +11,6 @@ module.exports = async function () {
 
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.json());
-
-    app.set('views', path.join(__dirname, './views'));
-    app.set('view engine', 'ejs');
 
     require('./routes/news')(app);
 
