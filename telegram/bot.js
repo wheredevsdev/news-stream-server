@@ -12,7 +12,7 @@ const { COLLECTIONS } = require("../constants");
  * @description Triggered when someone presses the 'Accept' or 'Reject' button.
  * @param { * } ioObject socket.io Object
  */
-async function setBotCallbackEvent(ioObject) {
+function listenForReviews(ioObject) {
 
 	bot.on('callback_query', callbackQuery => {
 
@@ -65,7 +65,7 @@ async function setBotCallbackEvent(ioObject) {
 			.catch(err => console.log(err));
 	});
 }
-exports.setBotCallbackEvent = setBotCallbackEvent;
+exports.listenForReviews = listenForReviews;
 
 
 
