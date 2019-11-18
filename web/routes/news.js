@@ -5,12 +5,17 @@ module.exports = function (app) {
 
     var controller = require('../controllers/news');
 
-    app.route('/NewsPost')
-        .get(controller.get_form_data)
-        .post(controller.post_form_data);
+    // app.route('/NewsPost')
+    //     .get(controller.get_form_data)
+    //     .post(controller.post_form_data);
 
-    app.route('/NewsDisplay')
-        .get(controller.get_articles);
+    // app.route('/NewsDisplay')
+    //     .get(controller.get_articles); 
+
+    app.get("/news", controller.get_articles_by_datetime);
+
+    app.get("/news/:id", controller.get_article_details);
+
 
 
     if (process.env.NODE_ENV === "development") {

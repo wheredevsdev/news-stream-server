@@ -16,5 +16,8 @@ exports.start = function (jobName) {
         cronTime,
         onTick: () => { tickFunction() }
     });
-    cron.start();
+    
+    if(process.env.NODE_ENV != "development"){
+        cron.start();
+    }
 }
