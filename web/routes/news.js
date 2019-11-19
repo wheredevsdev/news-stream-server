@@ -1,20 +1,48 @@
 const NewsLib = require("../../library/newsAPI");
 const BotLib = require("../../library/bot");
+const mongoose = require('mongoose');
 
 module.exports = function (app) {
 
     var controller = require('../controllers/news');
 
-    // app.route('/NewsPost')
-    //     .get(controller.get_form_data)
-    //     .post(controller.post_form_data);
+    // Get articles where publishedDate is less than a specified date 
+    app.get("/news", (req, res) => {
+        const loadFrom = !isNaN(Date.parse(req.query.d)) ? new Date(req.query.d) : res.status(400).json({ message: "Incorrect date field" });
+      
+        controller.get_articles_by_datetime(loadFrom)
+          .then(function(articles) {
+            return res
+              .json(articles);
+          })
+          .catch(function(err) {
+            console.log(err);
+            return res
+              .status(500)
+              .json({ message: "Something unexpected occured.", err });
+      
+          });
+      });
 
-    // app.route('/NewsDisplay')
-    //     .get(controller.get_articles); 
 
-    app.get("/news", controller.get_articles_by_datetime);
-
-    app.get("/news/:id", controller.get_article_details);
+      //Get all the details of an article from its id
+      app.get("/news/:id", (req, res) => {
+        const articleId = mongoose.Types.ObjectId(req.params.id);
+      
+        controller.get_article_details(articleId)
+          .then(function(article) {
+            console.log(article)
+            return res
+              .json(article);
+          })
+          .catch(function(err) {
+            console.log(err);
+            return res
+              .status(500)
+              .json({ message: "Something unexpected occured.", err });
+      
+          });
+      });
 
 
 
