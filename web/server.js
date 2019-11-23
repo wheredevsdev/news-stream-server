@@ -1,6 +1,6 @@
 const express = require('express'),
     socketServer = require('socket.io'),
-    port = parseInt(process.env.PORT) || 3000,
+    port = parseInt(process.env.PORT) || 8080,
     app = express(),
     bodyParser = require('body-parser'),
     cors = require("cors");
