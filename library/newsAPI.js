@@ -69,7 +69,7 @@ function getNews() {
                                 origin: response.articles[j].source.name,
                                 url: response.articles[j].url,
                                 urlToImage: response.articles[j].urlToImage,
-                                publishedDate: response.articles[j].publishedAt,
+                                publishedDate: !isNaN(Date.parse( response.articles[j].publishedAt))? new Date( response.articles[j].publishedAt) : new Date(),
                                 content: response.articles[j].content
                                 // urlToImage: a.image,
                                 // content: a.content
@@ -103,7 +103,7 @@ function getNews() {
                                 author: response[j].by,
                                 origin: 'Hacker News',
                                 url: response[j].url,
-                                publishedDate: new Date(response[j].time * 1000)
+                                publishedDate: !isNaN(new Date(response[j].time * 1000))? new Date(response[j].time * 1000) : new Date() 
                             });
                         }
                     }
@@ -126,7 +126,7 @@ function getNews() {
                                 preReviewGNews.push({
                                     title: response.articles[j].title,
                                     author: 'Not Specified',
-                                    publishedDate: response.articles[j].publishedAt,
+                                    publishedDate: !isNaN(Date.parse(response.articles[j].publishedAt))? new Date(response.articles[j].publishedAt) : new Date(),
                                     origin: response.articles[j].source.name,
                                     url: response.articles[j].url,
                                     urlToImage: response.articles[j].image,

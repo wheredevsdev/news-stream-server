@@ -35,10 +35,10 @@ function listenForReviews(ioObject) {
 								.create({
 									title: news.title,
 									author: news.author,
-									publishedDate: news.publishedAt,
+									publishedDate: !isNaN(Date.parse(news.publishedDate))? new Date(news.publishedDate) : new Date(),
 									origin: news.source,
 									url: news.url,
-									urlToImage: news.urlToImage,
+									urlToImage: news.urlToImage, 
 									content: news.content
 								})
 								.then(function () {
@@ -60,7 +60,7 @@ function listenForReviews(ioObject) {
 			.then(function () {
 				// Send a message telling whether the article has been accepted or rejected.
 				return bot.sendMessage(message.chat.id, "Article \"" + newsDetails[0] + "\" has been " + newsDetails[1])
-					.then(() => nModel.findOneAndUpdate({ _id: newsDetails[2] }, { status: newsDetails[1] }, { upsert: false }));
+					.then(() => collection(COLLECTIONS.PRE_REVIEW).findOneAndUpdate({ _id: newsDetails[2] }, { status: newsDetails[1] }, { upsert: false }));
 			})
 			.catch(err => console.log(err));
 	});
