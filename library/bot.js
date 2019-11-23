@@ -41,9 +41,9 @@ function listenForReviews(ioObject) {
 									urlToImage: news.urlToImage, 
 									content: news.content
 								})
-								.then(function () {
+								.then(function (article) {
 									// Emit new article event only when succesfully saved to our database.
-									ioObject.sockets.emit('new_article', { data: 'SomeArticle' });
+									ioObject.sockets.emit('article', { article });
 
 									// Delete the message with article details and inline keyboard.
 									bot.deleteMessage(process.env.CHATID, message.message_id);

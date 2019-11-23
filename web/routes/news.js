@@ -6,51 +6,50 @@ module.exports = function (app) {
 
     var controller = require('../controllers/news');
 
+    app.get("/_health", function (req, res) {
+        res.status(200).json({ message: "OK" });
+    });
+
     // Get articles where publishedDate is less than a specified date 
     app.get("/news", (req, res) => {
         const loadFrom = !isNaN(Date.parse(req.query.d)) ? new Date(req.query.d) : res.status(400).json({ message: "Incorrect date field" });
-      
-        controller.get_articles_by_datetime(loadFrom)
-          .then(function(articles) {
-            return res
-              .json(articles);
-          })
-          .catch(function(err) {
-            console.log(err);
-            return res
-              .status(500)
-              .json({ message: "Something unexpected occured.", err });
-      
-          });
-      });
+        const loadLimit = req.query.l ? parseInt(req.query.l) : 10;
+
+        controller.getArticlesByDateTime(loadFrom, loadLimit)
+            .then(function (articles) {
+                return res
+                    .json(articles);
+            })
+            .catch(function (err) {
+                console.log(err);
+                return res
+                    .status(500)
+                    .json({ message: "Something unexpected occured.", err });
+            });
+    });
 
 
-      //Get all the details of an article from its id
-      app.get("/news/:id", (req, res) => {
+    //Get all the details of an article from its id
+    app.get("/news/:id", (req, res) => {
         const articleId = mongoose.Types.ObjectId(req.params.id);
-      
-        controller.get_article_details(articleId)
-          .then(function(article) {
-            console.log(article)
-            return res
-              .json(article);
-          })
-          .catch(function(err) {
-            console.log(err);
-            return res
-              .status(500)
-              .json({ message: "Something unexpected occured.", err });
-      
-          });
-      });
+
+        controller.getArticleDetails(articleId)
+            .then(function (article) {
+                console.log(article)
+                return res
+                    .json(article);
+            })
+            .catch(function (err) {
+                console.log(err);
+                return res
+                    .status(500)
+                    .json({ message: "Something unexpected occured.", err });
+            });
+    });
 
 
 
     if (process.env.NODE_ENV === "development") {
-        app.get("/ping", function(req, res) {
-            res.json({ message: "Hello world!" });
-        })
-
         app.get("/getNews", function (req, res) {
             console.log("Seeding news in database.")
             NewsLib.getNews()

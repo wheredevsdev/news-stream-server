@@ -1,9 +1,9 @@
 const express = require('express'),
     socketServer = require('socket.io'),
-    port = process.env.PORT || 3000,
+    port = parseInt(process.env.PORT) || 3000,
     app = express(),
     bodyParser = require('body-parser'),
-    httpServer = require('http').Server(app);
+    cors = require("cors");
 
 global.SOCKET_CONNECTIONS = 0;
 
@@ -11,22 +11,24 @@ module.exports = async function () {
 
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.json());
+    
+    app.use(cors());
 
     require('./routes/news')(app);
 
-    const io = new socketServer(httpServer);
+    const io = new socketServer(9090);
 
-    io.on('Connection', socket => {
+    io.on('connection', socket => {
         global.SOCKET_CONNECTIONS++;
-        console.log(`Received connection from ${socket.handshake.address}. ID: ${socket.id}`);
+        console.log(`[SOCKET] Event: "Connection" | IP: "${socket.handshake.address}" | ID: "${socket.id}" |`);
         
         socket.on('disconnect', () => {
             --global.SOCKET_CONNECTIONS;
-            console.log(`${socket.id} disconnected.`);
+            console.log(`[SOCKET] Event: "Disconnection" | ID: "${socket.id}" |`);
         });
     });
 
-    httpServer.listen(port, () => {
+    app.listen(port, () => {
         console.log('Server started on ' + port);
     });
 
