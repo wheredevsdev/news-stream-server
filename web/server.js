@@ -14,8 +14,6 @@ module.exports = async function () {
     
     app.use(cors());
 
-    require('./routes/news')(app);
-
     const io = new socketServer(9090);
 
     io.on('connection', socket => {
@@ -27,6 +25,8 @@ module.exports = async function () {
             console.log(`[SOCKET] Event: "Disconnection" | ID: "${socket.id}" |`);
         });
     });
+
+    require('./routes/news')(app, io);
 
     app.listen(port, () => {
         console.log('Server started on ' + port);

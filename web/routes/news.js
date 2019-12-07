@@ -2,7 +2,7 @@ const NewsLib = require("../../library/newsAPI");
 const BotLib = require("../../library/bot");
 const mongoose = require('mongoose');
 
-module.exports = function (app) {
+module.exports = function (app, ioObject) {
 
     var controller = require('../controllers/news');
 
@@ -50,6 +50,10 @@ module.exports = function (app) {
 
 
     if (process.env.NODE_ENV === "development") {
+        app.get("/emitEvent", function(req, res) {
+            ioObject.sockets.emit('article', { article: "test" });
+        });
+
         app.get("/getNews", function (req, res) {
             console.log("Seeding news in database.")
             NewsLib.getNews()

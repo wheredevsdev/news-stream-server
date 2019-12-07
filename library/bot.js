@@ -35,10 +35,10 @@ function listenForReviews(ioObject) {
 								.create({
 									title: news.title,
 									author: news.author,
-									publishedDate: !isNaN(Date.parse(news.publishedDate))? new Date(news.publishedDate) : new Date(),
+									publishedDate: !isNaN(Date.parse(news.publishedDate)) ? new Date(news.publishedDate) : new Date(),
 									origin: news.source,
 									url: news.url,
-									urlToImage: news.urlToImage, 
+									urlToImage: news.urlToImage,
 									content: news.content
 								})
 								.then(function (article) {
