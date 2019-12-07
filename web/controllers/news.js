@@ -4,7 +4,7 @@ const { COLLECTIONS } = require("../../constants");
 
 exports.getArticlesByDateTime = function (date, limit) {
     return getModel(COLLECTIONS.POST_REVIEW)
-        .find({ publishedDate: { $lt: date } })
+        .find({ publishedDate: { $lte: date } })
         .sort({ publishedDate: -1 })
         .limit(limit)
         .exec();
