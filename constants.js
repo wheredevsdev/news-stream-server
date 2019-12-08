@@ -4,7 +4,7 @@ const COLLECTIONS = {
 };
 exports.COLLECTIONS = COLLECTIONS;
 
-const SOURCES = ['the-verge', 'wired', 'the-next-web', 'techradar', 'techcrunch', 'recode', 'engadget', 'ars-technica'];
+const SOURCES = ['the-verge', 'wired', 'the-next-web', 'techradar', 'techcrunch', 'recode', 'engadget', 'ars-technica', 'hacker-news'];
 exports.SOURCES = SOURCES;
 
 const MAX_ARTICLES_TO_DUMP = 100;
