@@ -1,153 +1,75 @@
 const { getModel: collection } = require("../database");
 const NewsAPI = require('newsapi');
-const axios = require("axios");
-const Bluebird = require("bluebird");
 
-const newsAPI = new NewsAPI(process.env.NEWSAPITOKEN);
+const api = new NewsAPI(process.env.NEWSAPITOKEN);
 
-const { COLLECTIONS, SOURCES,
-    HACKERNEWS_TOP_URL, HACKERNEWS_STORY_URL, GNEWS_TOP_URL } = require("../constants");
-
+const { COLLECTIONS, SOURCES } = require("../constants");
 
 /**
  * @description Fetches, filters and inserts news articles in 'prereview' collection.
  */
 function getNews() {
 
-    function requestHackerNews() {
-        return axios.get(HACKERNEWS_TOP_URL)
-            .then(response => response.data);
-    }
-
     function requestNewsAPI() {
-        return newsAPI.v2
+        return api.v2
             .topHeadlines({
                 sources: SOURCES.join(","),
                 language: 'en',
-                pageSize: 40
+                pageSize: 50
             });
     }
 
-    function requestGNews() {
-        return axios.get(GNEWS_TOP_URL)
-            .then(response => response.data);
-    }
-
     function insertNews(previewArr) {
-        // Insert data into the collection.
         return collection(COLLECTIONS.PRE_REVIEW)
             .insertMany(previewArr)
             .then(() => {
                 console.log(previewArr.length + " articles inserted into the preReview collection");
-            })
+            });
     }
 
-    // Get the published-date of the newest article from the database
-    return collection(COLLECTIONS.PRE_REVIEW)
-        .findOne({})
-        .sort("-publishedDate")
-        .then(response => {
+    function validateArticle(article, minDate) {
+        return (
+            article.author != undefined
+            && article.publishedAt
+            && !isNaN(Date.parse(article.publishedAt))
+            && new Date(article.publishedAt).valueOf() > minDate.valueOf()
+            && article.title
+            && article.author
+            && article.url
+            && article.source
+            && article.source.name
+        );
+    }
 
-            const maxDate = response.publishedDate;
-            console.log("Articles published after " + new Date(maxDate) + " are going to be inserted.")
+    const prmGetLatestArticle =
+        collection(COLLECTIONS.PRE_REVIEW)
+            .findOne({})
+            .sort("-publishedDate");
 
-            // Get the response from NewsAPI and insert the response into preReview collection.
-            const prmNewsAPI = requestNewsAPI()
-                .then(response => {
+    const prmFetchHeadlines = requestNewsAPI();
 
-                    // console.log(response);
-                    const previewArrNewsAPI = [];
+    return Promise.all([prmGetLatestArticle, prmFetchHeadlines])
+        .then(([latestArticle, response]) => {
+            const minDate = new Date(latestArticle.publishedDate);
 
-                    for (let j = 0; j < 40; j++) {
-                        // Accept responses only where the author is not null to minimise repeated articles.
-                        if (Object.keys(response.articles[j]).length > 1
-                            && new Date(response.articles[j].publishedAt) > new Date(maxDate)
-                            && response.articles[j].author != undefined) {
-                            previewArrNewsAPI.push({
-                                title: response.articles[j].title,
-                                author: response.articles[j].author,
-                                origin: response.articles[j].source.name,
-                                url: response.articles[j].url,
-                                urlToImage: response.articles[j].urlToImage,
-                                publishedDate: !isNaN(Date.parse( response.articles[j].publishedAt))? new Date( response.articles[j].publishedAt) : new Date(),
-                                content: response.articles[j].content
-                                // urlToImage: a.image,
-                                // content: a.content
-                            });
-                        }
-                    }
-
-                    return insertNews(previewArrNewsAPI);
-                })
-                .catch(err => {
-                    console.log(err);
-                });
-
-            // Get the response from HackerNews and insert the response into preReview collection.
-            const prmHackerNews = requestHackerNews()
-                .then(response => {
-                    return Bluebird.map(response, id => {
-                        const url = `${HACKERNEWS_STORY_URL}${id}.json`;
-                        return axios.get(url).then(response => response.data);
-                    })
-                })
-                .then(response => {
-                    const preReviewHackerNews = [];
-                    for (let j = 0; j < 30; j++) {
-                        // Accept responses only where the author is not null to minimise repeated articles.
-                        // console.log(new Date(response[j].time * 1000), new Date(maxDate));
-                        if (new Date(response[j].time * 1000) > new Date(maxDate)
-                            && response[j].by != undefined) {
-                            preReviewHackerNews.push({
-                                title: response[j].title,
-                                author: response[j].by,
-                                origin: 'Hacker News',
-                                url: response[j].url,
-                                publishedDate: !isNaN(new Date(response[j].time * 1000))? new Date(response[j].time * 1000) : new Date() 
-                            });
-                        }
-                    }
-                    return insertNews(preReviewHackerNews);
-                })
-                .catch(err => {
-                    console.log(err);
-                });
-
-            // // Get data fron GNewsAPI and insert the response into preReview collection.
-            const prmGNews = requestGNews()
-                .then((response) => {
-                    if (response) {
-                        const preReviewGNews = [];
-                        for (let j = 0; j < 10; j++) {
-                            // Accept responses only where the author is not null to minimise repeated articles.
-                            // console.log(new Date(response[j].time * 1000), new Date(maxDate));
-                            console.log(response.articles[j].source);
-                            if (new Date(response.articles[j].publishedAt) > new Date(maxDate)) {
-                                preReviewGNews.push({
-                                    title: response.articles[j].title,
-                                    author: 'Not Specified',
-                                    publishedDate: !isNaN(Date.parse(response.articles[j].publishedAt))? new Date(response.articles[j].publishedAt) : new Date(),
-                                    origin: response.articles[j].source.name,
-                                    url: response.articles[j].url,
-                                    urlToImage: response.articles[j].image,
-                                    content: response.articles[j].content
-                                });
+            if (response.articles && response.articles.length) {
+                const previewArrNewsAPI =
+                    response
+                        .articles
+                        .filter(article => validateArticle(article, minDate))
+                        .map(article => {
+                            return {
+                                title: article.title,
+                                author: article.author,
+                                origin: article.source.name,
+                                url: article.url,
+                                urlToImage: article.urlToImage,
+                                publishedDate: new Date(article.publishedAt),
+                                content: article.content
                             }
-                        }
-                        return insertNews(preReviewGNews);
-                    } else {
-                        return undefined;
-                    }
-                })
-                .catch(err => {
-                    console.log(err);
-                });
-
-            return Promise.all([
-                prmNewsAPI, 
-                prmHackerNews, 
-                prmGNews
-            ])
+                        });
+                return insertNews(previewArrNewsAPI);
+            }
         }).catch(err => {
             console.log(err);
         });
